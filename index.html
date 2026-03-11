@@ -1,0 +1,336 @@
+<!--TERMOS DE USO E ISENÇÃO DE RESPONSABILIDADE
+
+Natureza da Ferramenta: Este software é uma ferramenta técnica de auxílio à automação de documentos. O desenvolvedor não presta consultoria jurídica.
+
+Sem Garantia de Resultado: O conteúdo gerado deve ser revisado por um profissional jurídico qualificado antes de sua publicação oficial.
+
+Limitação de Responsabilidade: Em nenhuma circunstância o desenvolvedor será responsável por quaisquer danos, multas, sanções da ANPD (Autoridade Nacional de Proteção de Dados) ou perdas decorrentes do uso desta ferramenta.
+
+Licença: A compra deste script concede o direito de uso e customização, sendo estritamente proibida a revenda do código-fonte original sem autorização prévia.-->
+
+
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Políticas de Privacidade & LGPD - Profissional</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #1e293b; --accent: #3b82f6; --success: #10b981;
+            --bg: #f1f5f9; --card-bg: #ffffff; --text: #334155;
+            --border: #e2e8f0; --input-bg: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --primary: #60a5fa; --bg: #0f172a; --card-bg: #1e293b;
+            --text: #f1f5f9; --border: #334155; --input-bg: #1e293b;
+        }
+
+        body { 
+            font-family: 'Inter', system-ui, sans-serif; 
+            background-color: var(--bg); 
+            background-image: radial-gradient(var(--border) 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--text); 
+            margin: 0; 
+            transition: 0.3s; 
+            padding-bottom: 50px;
+        }
+        
+        .progress-container { width: 100%; height: 6px; background: var(--border); position: fixed; top: 0; z-index: 1001; }
+        .progress-bar { height: 100%; background: var(--accent); width: 0%; transition: 0.4s; }
+
+        header { 
+            background-color: var(--card-bg); padding: 2.5rem 1rem; text-align: center; border-bottom: 1px solid var(--border);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); position: relative; overflow: hidden;
+        }
+
+        header::before {
+            content: "\f3ed"; font-family: "Font Awesome 5 Free"; font-weight: 900;
+            position: absolute; font-size: 15rem; opacity: 0.03; right: -2rem; top: -2rem;
+        }
+
+        .controls { position: fixed; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 1000; }
+        .control-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--card-bg); border: 1px solid var(--border); color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+
+        .container { display: grid; grid-template-columns: 1fr 1.5fr; gap: 2rem; max-width: 1300px; width: 94%; margin: 2rem auto; }
+
+        .card { background: var(--card-bg); padding: 2rem; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
+
+        .card-title { display: flex; align-items: center; gap: 12px; font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--accent); }
+        .card-desc { font-size: 0.85rem; opacity: 0.7; margin-bottom: 1.5rem; }
+
+        .form-group { margin-bottom: 1.2rem; }
+        label { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: 600; font-size: 0.85rem; }
+        
+        input {
+            width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;
+            background-color: var(--input-bg) !important; color: var(--text);
+            box-sizing: border-box; font-size: 1rem; outline: none; transition: 0.2s;
+        }
+
+        #preview {
+            background: var(--input-bg); border: 1px solid var(--border); padding: 2rem;
+            height: 520px; overflow-y: auto; border-radius: 8px;
+            font-size: 0.95rem; line-height: 1.8; white-space: pre-line;
+            text-align: justify;
+        }
+
+        .button-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-top: 20px; }
+        button { padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
+        button:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+        .btn-copy { background: var(--accent); color: white; }
+        .btn-pdf { background: var(--success); color: white; }
+        .btn-html { background: var(--primary); color: white; }
+        .btn-link { background: #6366f1; color: white; }
+        .btn-clear { background: #ef4444; color: white; margin-top: 10px; width: 100%; }
+
+        .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; max-width: 1300px; width: 94%; margin: 2rem auto 4rem; }
+        .feature-item { text-align: center; padding: 1.5rem; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .feature-item i { font-size: 2rem; color: var(--accent); margin-bottom: 10px; }
+        .feature-item h4 { margin: 10px 0; color: var(--primary); }
+        .feature-item p { font-size: 0.85rem; opacity: 0.8; margin: 0; }
+
+        @media (max-width: 1000px) { .container { grid-template-columns: 1fr; } .features { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body data-theme="light">
+
+<div class="progress-container"><div class="progress-bar" id="myBar"></div></div>
+
+<div class="controls">
+    <button class="control-btn" onclick="toggleTheme()" title="Tema"><i class="fas fa-adjust"></i></button>
+    <button class="control-btn" onclick="toggleLang()" id="lang-btn">EN</button>
+</div>
+
+<header>
+    <i class="fas fa-user-lock" style="font-size: 3rem; color: var(--accent); margin-bottom: 15px;"></i>
+    <h1 id="t-title">Gerador de Políticas de Privacidade & LGPD</h1>
+    <p id="t-subtitle">Documentos profissionais e acessíveis para o seu negócio</p>
+</header>
+
+<div class="container">
+    <div class="card">
+        <div class="card-title" id="t-info"><i class="fas fa-edit"></i> Informações do Projeto</div>
+        <p class="card-desc" id="d-info">Insira os dados básicos da sua operação.</p>
+        
+        <div class="form-group">
+            <label id="l-nome"><i class="fas fa-building"></i> Razão Social / Nome do Site</label>
+            <input type="text" id="nome" placeholder="..." oninput="atualizar()">
+        </div>
+        <div class="form-group">
+            <label id="l-doc"><i class="fas fa-id-card"></i> CPF ou CNPJ (automático)</label>
+            <input type="text" id="documento" placeholder="00.000.000/0000-00" oninput="executarMascara(this); atualizar()">
+        </div>
+        <div class="form-group">
+            <label id="l-email"><i class="fas fa-envelope-open-text"></i> E-mail de Suporte / DPO</label>
+            <input type="email" id="email" placeholder="contato@seusite.com.br" oninput="atualizar()">
+        </div>
+        <div class="form-group">
+            <label id="l-dados"><i class="fas fa-database"></i> Dados que você coleta</label>
+            <input type="text" id="dados" placeholder="Ex: Nome, e-mail e telefone" oninput="atualizar()">
+        </div>
+        <button class="btn-clear" onclick="limparCampos()"><i class="fas fa-trash-alt"></i> <span id="t-reset">Limpar Tudo</span></button>
+    </div>
+
+    <div class="card">
+        <div class="card-title" id="t-res"><i class="fas fa-file-signature"></i> Visualização Jurídica</div>
+        <p class="card-desc" id="d-res">Revise o texto abaixo e utilize os botões para exportar.</p>
+        <div id="preview">Aguardando dados...</div>
+        
+        <div class="button-grid">
+            <button class="btn-copy" onclick="copiar('text')"><i class="fas fa-copy"></i> <span id="btn-t-text">Texto</span></button>
+            <button class="btn-html" onclick="copiar('html')"><i class="fas fa-code"></i> HTML</button>
+            <button class="btn-pdf" onclick="baixarPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+            <button class="btn-link" onclick="gerarLinkUrl()"><i class="fas fa-link"></i> Link</button>
+        </div>
+    </div>
+</div>
+
+<div class="features">
+    <div class="feature-item">
+        <i class="fas fa-shield-alt"></i>
+        <h4 id="f1-t">Segurança Jurídica</h4>
+        <p id="f1-p">Documentos baseados nas diretrizes oficiais da LGPD (Lei 13.709/2018).</p>
+    </div>
+    <div class="feature-item">
+        <i class="fas fa-bolt"></i>
+        <h4 id="f2-t">Geração Expressa</h4>
+        <p id="f2-p">Preencha os dados e receba seu documento formatado em segundos.</p>
+    </div>
+    <div class="feature-item">
+        <i class="fas fa-globe-americas"></i>
+        <h4 id="f3-t">Multi-idioma</h4>
+        <p id="f3-p">Tradução jurídica simplificada para mercados internacionais (EN/PT).</p>
+    </div>
+</div>
+
+<script>
+    let lang = 'pt';
+
+    window.onload = () => {
+        const params = new URLSearchParams(window.location.search);
+        if(params.has('n')) document.getElementById('nome').value = decodeURIComponent(params.get('n'));
+        if(params.has('d')) document.getElementById('documento').value = decodeURIComponent(params.get('d'));
+        if(params.has('e')) document.getElementById('email').value = decodeURIComponent(params.get('e'));
+        if(params.has('da')) document.getElementById('dados').value = decodeURIComponent(params.get('da'));
+        if(document.getElementById('nome').value) { executarMascara(document.getElementById('documento')); atualizar(); }
+    };
+
+    // AJUSTADO: Função que limpa dados sem recarregar a página
+    function limparCampos() {
+        const ids = ['nome', 'documento', 'email', 'dados'];
+        ids.forEach(id => document.getElementById(id).value = '');
+        atualizar(); // Atualiza o preview para o estado "Aguardando"
+        // Remove os parâmetros da URL para limpar o link de progresso também
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    function gerarLinkUrl() {
+        const url = new URL(window.location.href.split('?')[0]);
+        url.searchParams.set('n', encodeURIComponent(document.getElementById('nome').value));
+        url.searchParams.set('d', encodeURIComponent(document.getElementById('documento').value));
+        url.searchParams.set('e', encodeURIComponent(document.getElementById('email').value));
+        url.searchParams.set('da', encodeURIComponent(document.getElementById('dados').value));
+        navigator.clipboard.writeText(url.toString());
+        alert(lang === 'pt' ? "Link copiado!" : "Link copied!");
+    }
+
+    function executarMascara(i) {
+        setTimeout(() => {
+            let v = i.value.replace(/\D/g, "");
+            if (v.length <= 11) { v = v.replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2"); } 
+            else { v = v.substring(0, 14); v = v.replace(/^(\d{2})(\d)/, "$1.$2").replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3").replace(/\.(\d{3})(\d)/, ".$1/$2").replace(/(\d{4})(\d)/, "$1-$2"); }
+            i.value = v;
+        }, 1);
+    }
+
+    function toggleLang() {
+        lang = lang === 'pt' ? 'en' : 'pt';
+        document.getElementById('lang-btn').innerText = lang === 'pt' ? 'EN' : 'PT';
+        traduzirInterface();
+        atualizar();
+    }
+
+    function traduzirInterface() {
+        const t = {
+            pt: { title: "Gerador de Políticas de Privacidade & LGPD", sub: "Documentos profissionais e acessíveis para o seu negócio", info: "Informações do Projeto", descI: "Insira os dados básicos da sua operação.", nome: "Razão Social / Nome do Site", doc: "CPF ou CNPJ (automático)", email: "E-mail de Suporte / DPO", dados: "Dados que você coleta", res: "Visualização Jurídica", descR: "Revise o texto abaixo e utilize os botões para exportar.", reset: "Limpar Tudo", btnText: "Texto", f1t: "Segurança Jurídica", f1p: "Documentos baseados nas diretrizes oficiais da LGPD.", f2t: "Geração Expressa", f2p: "Documento pronto em segundos.", f3t: "Multi-idioma", f3p: "Suporte para EN/PT." },
+            en: { title: "Privacy Policy & GDPR Generator", sub: "Professional and accessible legal documents", info: "Project Setup", descI: "Enter your operation's basic details.", nome: "Company Name / Site Name", doc: "Tax ID (automatic)", email: "Support Email / DPO", dados: "Data you collect", res: "Legal Preview", descR: "Review the text below and use buttons to export.", reset: "Clear All", btnText: "Copy Text", f1t: "Legal Security", f1p: "Documents based on GDPR/LGPD guidelines.", f2t: "Express Generation", f2p: "Document ready in seconds.", f3t: "Multi-language", f3p: "Support for EN/PT." }
+        };
+        const cur = t[lang];
+        document.getElementById('t-title').innerText = cur.title;
+        document.getElementById('t-subtitle').innerText = cur.sub;
+        document.getElementById('t-info').innerHTML = `<i class="fas fa-edit"></i> ${cur.info}`;
+        document.getElementById('d-info').innerText = cur.descI;
+        document.getElementById('l-nome').innerHTML = `<i class="fas fa-building"></i> ${cur.nome}`;
+        document.getElementById('l-doc').innerHTML = `<i class="fas fa-id-card"></i> ${cur.doc}`;
+        document.getElementById('l-email').innerHTML = `<i class="fas fa-envelope-open-text"></i> ${cur.email}`;
+        document.getElementById('l-dados').innerHTML = `<i class="fas fa-database"></i> ${cur.dados}`;
+        document.getElementById('t-res').innerHTML = `<i class="fas fa-file-signature"></i> ${cur.res}`;
+        document.getElementById('d-res').innerText = cur.descR;
+        document.getElementById('t-reset').innerText = cur.reset;
+        document.getElementById('btn-t-text').innerText = cur.btnText;
+        document.getElementById('f1-t').innerText = cur.f1t; document.getElementById('f1-p').innerText = cur.f1p;
+        document.getElementById('f2-t').innerText = cur.f2t; document.getElementById('f2-p').innerText = cur.f2p;
+        document.getElementById('f3-t').innerText = cur.f3t; document.getElementById('f3-p').innerText = cur.f3p;
+    }
+
+    function atualizar() {
+        const nV = document.getElementById('nome').value;
+        const dV = document.getElementById('documento').value;
+        const eV = document.getElementById('email').value;
+        const daV = document.getElementById('dados').value;
+
+        if(!nV && !dV && !eV && !daV) {
+            document.getElementById('preview').innerText = lang === 'pt' ? 'Aguardando dados...' : 'Waiting for data...';
+            document.getElementById('myBar').style.width = "0%";
+            return;
+        }
+
+        const nome = nV || '[NOME]';
+        const doc = dV || '[DOCUMENTO]';
+        const email = eV || '[E-MAIL]';
+        const dados = daV || '[DADOS]';
+        const data = new Date().toLocaleDateString('pt-BR');
+
+        let preenchidos = [nV, dV, eV, daV].filter(x => x !== '').length;
+        document.getElementById('myBar').style.width = (preenchidos * 25) + "%";
+
+        const pt = `POLÍTICA DE PRIVACIDADE - ${nome.toUpperCase()}
+
+A empresa ${nome}, registrada sob o documento ${doc}, apresenta este documento para detalhar como realizamos o tratamento de dados pessoais em conformidade com a Lei 13.709/2018 (LGPD).
+
+1. COLETA E FINALIDADE
+Coletamos os seguintes dados fornecidos por você: ${dados}. A finalidade desta coleta é garantir a execução dos nossos serviços, segurança do usuário e comunicação direta através do suporte em ${email}.
+
+2. DIREITOS DO TITULAR
+Em conformidade com a legislação vigente, você possui os seguintes direitos:
+• Confirmação da existência de tratamento;
+• Acesso facilitado aos seus dados armazenados;
+• Correção de dados incompletos ou inexatos;
+• Solicitação de eliminação de dados tratados com seu consentimento.
+
+3. ARMAZENAMENTO E SEGURANÇA
+Todos os dados coletados são armazenados em ambientes seguros. Aplicamos medidas técnicas para prevenir acessos não autorizados e situações acidentais de destruição ou alteração de informações.
+
+4. COMPARTILHAMENTO
+Não comercializamos seus dados pessoais. O compartilhamento ocorre apenas quando necessário para o cumprimento de obrigações legais ou execução do serviço contratado.
+
+5. CONTATO E ATENDIMENTO
+Para exercer seus direitos ou tirar dúvidas sobre esta política, entre em contato através do e-mail oficial: ${email}.
+
+Data da última atualização: ${data}`;
+
+        const en = `PRIVACY POLICY - ${nome.toUpperCase()}
+
+The company ${nome}, registered under ID ${doc}, presents this document to detail how we process personal data in compliance with data protection laws (GDPR/LGPD).
+
+1. COLLECTION AND PURPOSE
+We collect the following data provided by you: ${dados}. The purpose of this collection is to ensure the execution of our services, user security, and direct communication through support at ${email}.
+
+2. SUBJECT RIGHTS
+In accordance with current legislation, you have the following rights:
+• Confirmation of the existence of processing;
+• Easy access to your stored data;
+• Correction of incomplete or inaccurate data;
+• Request for deletion of data processed with your consent.
+
+3. STORAGE AND SECURITY
+All collected data is stored in secure environments. We apply technical measures to prevent unauthorized access and accidental situations of destruction or alteration of information.
+
+4. SHARING
+We do not sell your personal data. Sharing only occurs when necessary to comply with legal obligations or execution of the contracted service.
+
+5. CONTACT AND SUPPORT
+To exercise your rights or ask questions about this policy, please contact us through the official email: ${email}.
+
+Last updated: ${data}`;
+
+        document.getElementById('preview').innerText = lang === 'pt' ? pt : en;
+    }
+
+    function copiar(tipo) {
+        let texto = document.getElementById('preview').innerText;
+        if(tipo === 'html') texto = `<div style="font-family:sans-serif; padding:20px; border:1px solid #ddd; border-radius:8px;">${texto.replace(/\n/g, '<br>')}</div>`;
+        navigator.clipboard.writeText(texto);
+        alert(lang === 'pt' ? "Copiado!" : "Copied!");
+    }
+
+    async function baixarPDF() {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF();
+        pdf.text(pdf.splitTextToSize(document.getElementById('preview').innerText, 180), 15, 20);
+        pdf.save("politica_privacidade.pdf");
+    }
+
+    function toggleTheme() { document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
+</script>
+</body>
+</html>
